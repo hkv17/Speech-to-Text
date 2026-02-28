@@ -20,6 +20,7 @@ IDLE --[F5]--> RECORDING --[F5]--> TRANSCRIBING --> IDLE
 - `src/hotkey_listener.py` — глобальный слушатель клавиши F5 через pynput
 - `src/clipboard_handler.py` — копирование в буфер через pyperclip
 - `src/menu_bar.py` — иконка в menu bar через rumps (🎤 Idle / 🔴 Recording / ⏳ Transcribing)
+- `src/history.py` — история транскрипций в JSONL (~Library/Application Support/SpeechToText/)
 
 ## Tech Stack
 - Python 3.11

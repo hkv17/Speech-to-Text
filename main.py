@@ -5,7 +5,8 @@ from enum import Enum, auto
 
 from src.audio_recorder import AudioRecorder
 from src.clipboard_handler import copy_to_clipboard
-from src.config import SOUND_ENABLED, SOUND_NAME
+from src.config import HISTORY_ENABLED, SOUND_ENABLED, SOUND_NAME
+from src.history import HistoryManager
 from src.hotkey_listener import HotkeyListener
 from src.menu_bar import MenuBarController
 from src.transcriber import Transcriber
@@ -25,6 +26,7 @@ class App:
         self._transcriber = Transcriber()
         self._hotkey = HotkeyListener(on_f5=self._on_f5)
         self._menu_bar = MenuBarController()
+        self._history = HistoryManager()
 
     def run(self) -> None:
         print("Press F5 to start recording. Press F5 again to stop and transcribe.")
@@ -62,6 +64,8 @@ class App:
 
             if text:
                 copy_to_clipboard(text)
+                if HISTORY_ENABLED:
+                    self._history.add(text)
                 print(f"Copied to clipboard: {text}")
                 self._play_done_sound()
             else:

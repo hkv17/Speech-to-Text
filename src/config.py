@@ -28,3 +28,11 @@ SOUND_ENABLED = True
 # Options: Ping, Tink, Pop, Glass, Funk, Basso, Blow, Bottle,
 #          Frog, Hero, Morse, Purr, Sosumi, Submarine
 SOUND_NAME = "Ping"
+
+# --- History ----------------------------------------------------------------
+
+# Save transcription history to a local JSONL file.
+HISTORY_ENABLED = True
+
+# How many recent transcriptions to keep (older entries are trimmed).
+HISTORY_MAX_ENTRIES = 15
