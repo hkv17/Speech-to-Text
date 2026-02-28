@@ -1,0 +1,33 @@
+# Python virtual environment
+venv/
+.venv/
+env/
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Temp audio files
+/tmp/stt_recording.wav
+*.wav
+*.mp3
+*.ogg
+
+# Claude Code internals
+.claude/
+
+# VSCode
+.vscode/
+
+# macOS
+.DS_Store
+Thumbs.db
+
+# Model cache (downloaded separately, not tracked)
+*.gguf
+*.bin
+
+# Logs
+*.log
