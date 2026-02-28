@@ -7,6 +7,7 @@ from src.audio_recorder import AudioRecorder
 from src.clipboard_handler import copy_to_clipboard
 from src.config import SOUND_ENABLED, SOUND_NAME
 from src.hotkey_listener import HotkeyListener
+from src.menu_bar import MenuBarController
 from src.transcriber import Transcriber
 
 
@@ -23,20 +24,14 @@ class App:
         self._recorder = AudioRecorder()
         self._transcriber = Transcriber()
         self._hotkey = HotkeyListener(on_f5=self._on_f5)
+        self._menu_bar = MenuBarController()
 
     def run(self) -> None:
         print("Press F5 to start recording. Press F5 again to stop and transcribe.")
         print("Note: first transcription will download the model (~1.5GB) and may take a few minutes.")
-        print("Press Ctrl+C to exit.\n")
-
         self._hotkey.start()
-
-        try:
-            threading.Event().wait()  # Block forever until Ctrl+C
-        except KeyboardInterrupt:
-            print("\nExiting...")
-        finally:
-            self._hotkey.stop()
+        self._menu_bar.run()  # blocks; exits when user clicks Quit in menu bar
+        self._hotkey.stop()
 
     def _on_f5(self) -> None:
         with self._lock:
@@ -51,12 +46,14 @@ class App:
     def _start_recording(self) -> None:
         with self._lock:
             self._state = State.RECORDING
+        self._menu_bar.set_state(State.RECORDING)
         print("Recording... (press F5 to stop)")
         self._recorder.start()
 
     def _stop_and_transcribe(self) -> None:
         with self._lock:
             self._state = State.TRANSCRIBING
+        self._menu_bar.set_state(State.TRANSCRIBING)
         print("Transcribing...")
 
         try:
@@ -74,6 +71,7 @@ class App:
         finally:
             with self._lock:
                 self._state = State.IDLE
+            self._menu_bar.set_state(State.IDLE)
             print("\nReady. Press F5 to record.")
 
 

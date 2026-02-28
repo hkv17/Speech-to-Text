@@ -19,6 +19,7 @@ IDLE --[F5]--> RECORDING --[F5]--> TRANSCRIBING --> IDLE
 - `src/transcriber.py` — STT через mlx_whisper, модель whisper-medium-mlx
 - `src/hotkey_listener.py` — глобальный слушатель клавиши F5 через pynput
 - `src/clipboard_handler.py` — копирование в буфер через pyperclip
+- `src/menu_bar.py` — иконка в menu bar через rumps (🎤 Idle / 🔴 Recording / ⏳ Transcribing)
 
 ## Tech Stack
 - Python 3.11
@@ -26,6 +27,7 @@ IDLE --[F5]--> RECORDING --[F5]--> TRANSCRIBING --> IDLE
 - sounddevice (аудио запись)
 - pynput (глобальные горячие клавиши)
 - pyperclip (буфер обмена)
+- rumps (macOS menu bar)
 
 ## Модель
 - `mlx-community/whisper-medium-mlx` (~1.5GB)
