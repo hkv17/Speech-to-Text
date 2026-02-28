@@ -1,136 +1,166 @@
-# Speech-to-Text
+# Speech-to-Text (macOS, Offline, Whisper)
 
-Локальная программа speech-to-text для macOS (Apple Silicon M1/M2/M3).
-Слушает нажатие **F5** глобально, записывает голос, транскрибирует через
-локальную нейросеть Whisper, помещает результат в буфер обмена.
+A local speech-to-text utility for macOS on Apple Silicon (M1/M2/M3).
+It listens for the **F5** global hotkey, records your voice, transcribes it using
+a local Whisper model, and copies the result to your clipboard.
+
+## TL;DR
+
+- Offline transcription — audio never leaves your machine
+- macOS + Apple Silicon only (M1/M2/M3)
+- Global hotkey: press **F5** to start / stop recording
+- Result is copied to the clipboard automatically
+- Requires **Accessibility** permission (global hotkey) and **Microphone** permission (recording)
+- Hotkey conflict: F5 may be captured by other apps or IDEs (including VSCode debugger)
 
 ---
 
-## Быстрый старт
+## How it works
+
+```
+F5 → start recording → F5 → stop → transcribe (Whisper) → copy to clipboard → paste anywhere
+```
+
+---
+
+## Quick Start
+
+If running for the first time, the model downloads automatically (~1.5 GB).
 
 ```bash
 source venv/bin/activate
 python main.py
 ```
 
-Или нажать **F5** в VSCode (конфигурация запуска уже настроена).
+A launch configuration for VSCode is already included — you can also press **F5** inside VSCode
+to start the app (note: this will be consumed by the debugger, not the app itself, while VSCode is focused).
 
 ---
 
-## Использование
+## Usage
 
-| Действие | Результат |
-|---|---|
-| Нажать **F5** | Начало записи |
-| Нажать **F5** повторно | Остановка, транскрипция, текст в буфере обмена |
-| **Cmd+V** в любом приложении | Вставить распознанный текст |
-| **Ctrl+C** в терминале | Выход из программы |
+| Action                 | Result                                     |
+| ---------------------- | ------------------------------------------ |
+| Press **F5**           | Start recording                            |
+| Press **F5** again     | Stop → transcribe → copy text to clipboard |
+| **Cmd+V** anywhere     | Paste the recognised text                  |
+| **Ctrl+C** in terminal | Exit                                       |
 
-Программа работает в фоне — VSCode можно свернуть, F5 будет перехватываться
-в любом активном окне.
+The program runs in the background — you can minimise VSCode/Terminal and
+**F5** will still be captured in any active window.
 
 ---
 
-## Установка (первый раз)
+## Installation (first time)
 
 ```bash
-brew install python@3.11   # или использовать имеющийся Python 3.11+
+brew install python@3.11    # or use an existing Python 3.11+
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Разрешения macOS (однократно)
+### macOS Permissions (one-time)
 
-- **System Settings → Privacy & Security → Accessibility** → добавить VSCode и Terminal
-  _(нужно для глобального перехвата клавиш)_
-- Доступ к микрофону запросится автоматически при первом запуске
+**Accessibility** — required for global hotkey capture:
+
+> System Settings → Privacy & Security → Accessibility
+
+Add **Terminal** (or iTerm) and **VSCode** (if running from VSCode).
+You may need to restart the app after granting the permission.
+
+**Microphone** — macOS will prompt automatically on first run. Allow it.
 
 ---
 
-## Настройка модели
+## Configuration
 
-Настройка находится в файле [`src/transcriber.py`](src/transcriber.py), строка `MODEL_NAME`.
+All settings are in [`src/config.py`](src/config.py).
 
-| Модель | Размер | Скорость | Точность | Когда использовать |
-|---|---|---|---|---|
-| `mlx-community/whisper-small-mlx` | ~500 MB | Быстро | Хорошая | Если важна скорость |
-| `mlx-community/whisper-medium-mlx` | ~1.5 GB | Средне | Очень хорошая | **По умолчанию** |
-| `mlx-community/whisper-large-v3-mlx` | ~3 GB | Медленно | Отличная | Если важна точность |
-
-**Как сменить модель:**
-
-Откройте [`src/transcriber.py`](src/transcriber.py) и измените первую строку:
+### Whisper model
 
 ```python
-MODEL_NAME = "mlx-community/whisper-large-v3-mlx"  # ← вставьте нужную
+MODEL_NAME = "mlx-community/whisper-medium-mlx"
 ```
 
-Модель скачается автоматически при первом запуске в `~/.cache/huggingface/hub/`.
+| Model                                | Size    | Speed  | Accuracy  | Use when         |
+| ------------------------------------ | ------- | ------ | --------- | ---------------- |
+| `mlx-community/whisper-small-mlx`    | ~500 MB | Fast   | Good      | Speed matters    |
+| `mlx-community/whisper-medium-mlx`   | ~1.5 GB | Medium | Very good | **Default**      |
+| `mlx-community/whisper-large-v3-mlx` | ~3 GB   | Slow   | Excellent | Accuracy matters |
 
-### Добавить английские термины для лучшего распознавания
+Models are cached automatically at `~/.cache/huggingface/hub/`.
 
-Если программа неправильно пишет технические термины (например, пишет
-«клад кода» вместо «Claude Code»), добавьте нужное слово в `INITIAL_PROMPT`
-в файле [`src/transcriber.py`](src/transcriber.py):
+### Domain-specific terms (improve recognition of technical vocabulary)
+
+If the model mis-transcribes technical terms (e.g. writes "клад кода" instead of "Claude Code"),
+add them to `INITIAL_PROMPT` in [`src/config.py`](src/config.py):
 
 ```python
 INITIAL_PROMPT = (
-    "LLM, AI, API, Claude, Claude Code, ВашТермин, ..."
+    "LLM, AI, API, Claude, Claude Code, YourTerm, ..."
 )
 ```
 
----
-
-## Настройка звукового сигнала
-
-Настройка находится в файле [`src/config.py`](src/config.py).
-
-### Включить / выключить звук
+### Sound feedback
 
 ```python
-SOUND_ENABLED = True   # звук включён
-SOUND_ENABLED = False  # звук выключен
+SOUND_ENABLED = True   # set to False to disable
+SOUND_NAME = "Ping"    # name of the macOS system sound
 ```
 
-### Сменить звук
+Available sounds (files in `/System/Library/Sounds/`):
 
-```python
-SOUND_NAME = "Ping"  # ← название звука
-```
-
-**Доступные звуки macOS:**
-
-| Название | Характер |
-|---|---|
-| `Ping` | Короткий, чёткий _(по умолчанию)_ |
-| `Tink` | Тихий, мягкий |
-| `Pop` | Лёгкий хлопок |
-| `Glass` | Стеклянный |
-| `Funk` | Низкий, глухой |
-| `Hero` | Торжественный |
-| `Basso` | Глубокий бас |
-| `Blow` | Дуновение |
-| `Bottle` | Бутылка |
-| `Frog` | Лягушка |
-| `Morse` | Морзе |
-| `Purr` | Мурчание |
-| `Sosumi` | Классический Mac |
-| `Submarine` | Подводная лодка |
+| Name        | Character                |
+| ----------- | ------------------------ |
+| `Ping`      | Short, crisp *(default)* |
+| `Tink`      | Soft, quiet              |
+| `Pop`       | Light pop                |
+| `Glass`     | Glass tap                |
+| `Funk`      | Low thud                 |
+| `Hero`      | Triumphant               |
+| `Basso`     | Deep bass                |
+| `Blow`      | Breeze                   |
+| `Bottle`    | Bottle blow              |
+| `Frog`      | Frog croak               |
+| `Morse`     | Morse beep               |
+| `Purr`      | Purring                  |
+| `Sosumi`    | Classic Mac              |
+| `Submarine` | Sonar ping               |
 
 ---
 
-## Структура проекта
+## Troubleshooting
+
+**F5 does not work globally**
+- Make sure Accessibility permission is granted to the app you run from (Terminal / VSCode).
+- Restart Terminal/VSCode after enabling the permission.
+- Check that no other app is consuming F5 (browsers, IDEs, etc.).
+
+**No microphone input / silence recorded**
+- Check System Settings → Privacy & Security → Microphone and allow access.
+- Verify the correct input device is selected in macOS Sound settings.
+
+**Transcription is slow**
+- Switch to a smaller model (`whisper-small-mlx`) in [`src/config.py`](src/config.py).
+- The first run is slower while the model downloads.
+
+**Technical terms are mis-transcribed**
+- Add your terms to `INITIAL_PROMPT` in [`src/config.py`](src/config.py) (see Configuration above).
+
+---
+
+## Project structure
 
 ```
-├── main.py                  # Точка входа
+├── main.py                      # Entry point, state machine
 ├── src/
-│   ├── config.py            # Настройки (звук)
-│   ├── audio_recorder.py    # Запись с микрофона
-│   ├── transcriber.py       # Модель + промт для терминов
-│   ├── hotkey_listener.py   # Перехват клавиши F5
-│   └── clipboard_handler.py # Копирование в буфер
-└── .claude/agents/          # Агенты для Claude Code
-    ├── setup-checker.md     # Проверка окружения
-    └── transcription-tester.md  # Тест качества
+│   ├── config.py                # All settings (model, prompt, sound)
+│   ├── audio_recorder.py        # Microphone recording
+│   ├── transcriber.py           # Whisper inference
+│   ├── hotkey_listener.py       # Global F5 listener
+│   └── clipboard_handler.py     # Clipboard integration
+└── .claude/agents/              # Claude Code agents
+    ├── setup-checker.md         # Environment checks
+    └── transcription-tester.md  # Transcription quality tests
 ```

@@ -1,14 +1,6 @@
 import mlx_whisper
 
-MODEL_NAME = "mlx-community/whisper-medium-mlx"
-
-# Hint the model about English terms that appear in Russian speech.
-# Add your own technical terms here to improve mixed-language accuracy.
-INITIAL_PROMPT = (
-    "LLM, AI, API, Claude, Claude Code, Anthropic, "
-    "Visual Studio Code, VS Code, Python, speech to text, "
-    "prompt, token, GPT, ChatGPT, GitHub, JavaScript, TypeScript"
-)
+from src.config import INITIAL_PROMPT, MODEL_NAME
 
 
 class Transcriber:

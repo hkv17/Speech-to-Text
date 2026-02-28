@@ -1,12 +1,30 @@
-# ---------------------------------------------------------------------------
-# App settings — edit here to customize behaviour
-# ---------------------------------------------------------------------------
+# =============================================================================
+# Configuration — edit this file to customise the app
+# =============================================================================
 
-# Play a sound when transcription is done and text is in the clipboard.
-# Set to False to disable.
+# --- Model ------------------------------------------------------------------
+
+# Whisper model to use for transcription.
+# Options (trade-off: speed vs accuracy):
+#   "mlx-community/whisper-small-mlx"      ~500 MB  fastest
+#   "mlx-community/whisper-medium-mlx"     ~1.5 GB  balanced  ← default
+#   "mlx-community/whisper-large-v3-mlx"   ~3 GB    most accurate
+MODEL_NAME = "mlx-community/whisper-medium-mlx"
+
+# Words/phrases to hint the model toward when transcribing mixed-language speech.
+# Add technical terms that the model tends to mis-transcribe in Russian phonetics.
+INITIAL_PROMPT = (
+    "LLM, AI, API, Claude, Claude Code, Anthropic, "
+    "Visual Studio Code, VS Code, Python, speech to text, "
+    "prompt, token, GPT, ChatGPT, GitHub, JavaScript, TypeScript"
+)
+
+# --- Sound ------------------------------------------------------------------
+
+# Play a sound when transcription is done and the text is in the clipboard.
 SOUND_ENABLED = True
 
-# macOS system sound to play. Available sounds in /System/Library/Sounds/:
-# Ping, Tink, Pop, Glass, Funk, Basso, Blow, Bottle, Frog, Hero, Morse,
-# Purr, Sosumi, Submarine
+# macOS system sound name (files live in /System/Library/Sounds/).
+# Options: Ping, Tink, Pop, Glass, Funk, Basso, Blow, Bottle,
+#          Frog, Hero, Morse, Purr, Sosumi, Submarine
 SOUND_NAME = "Ping"
