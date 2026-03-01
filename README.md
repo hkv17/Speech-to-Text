@@ -10,6 +10,8 @@ a local Whisper model, and copies the result to your clipboard.
 - macOS + Apple Silicon only (M1/M2/M3)
 - Global hotkey: press **F5** to start / stop recording
 - Result is copied to the clipboard automatically
+- Menu bar icon shows live status and lets you re-copy recent transcriptions
+- Transcription history saved locally; last 15 entries are kept
 - Requires **Accessibility** permission (global hotkey) and **Microphone** permission (recording)
 - Hotkey conflict: F5 may be captured by other apps or IDEs (including VSCode debugger)
 
@@ -39,15 +41,33 @@ to start the app (note: this will be consumed by the debugger, not the app itsel
 
 ## Usage
 
-| Action                 | Result                                     |
-| ---------------------- | ------------------------------------------ |
-| Press **F5**           | Start recording                            |
-| Press **F5** again     | Stop → transcribe → copy text to clipboard |
-| **Cmd+V** anywhere     | Paste the recognised text                  |
-| **Ctrl+C** in terminal | Exit                                       |
+| Action                        | Result                                     |
+| ----------------------------- | ------------------------------------------ |
+| Press **F5**                  | Start recording                            |
+| Press **F5** again            | Stop → transcribe → copy text to clipboard |
+| **Cmd+V** anywhere            | Paste the recognised text                  |
+| Click a recent item in menu   | Copy that transcription to clipboard again |
+| **Open History File** in menu | Open full history in text editor           |
+| **Quit** in menu bar          | Exit the app                               |
 
 The program runs in the background — you can minimise VSCode/Terminal and
 **F5** will still be captured in any active window.
+
+## Menu Bar
+
+The menu bar icon shows the current state at a glance:
+
+| Icon | State          |
+| ---- | -------------- |
+| 🎤   | Idle, ready    |
+| 🔴   | Recording      |
+| ⏳   | Transcribing   |
+
+Clicking the menu bar icon opens a dropdown with:
+- **Status line** — current state in text
+- **Last 3 transcriptions** — click any to copy it to the clipboard again
+- **Open History File** — opens the full history (last 15 entries) in a text editor
+- **Quit** — exits the app
 
 ---
 
@@ -102,6 +122,24 @@ INITIAL_PROMPT = (
 )
 ```
 
+### History
+
+```python
+HISTORY_ENABLED = True       # set to False to disable
+HISTORY_MAX_ENTRIES = 15     # how many entries to keep in the file
+MENU_RECENT_COUNT = 3        # how many to show in the menu bar dropdown
+MENU_RECENT_MAX_LENGTH = 50  # max characters per item before truncating
+```
+
+History is saved to:
+```
+~/Library/Application Support/SpeechToText/history.jsonl
+```
+
+Each line is a JSON object: `{"ts": "2024-01-15T10:30:00", "text": "your transcription"}`.
+
+---
+
 ### Sound feedback
 
 ```python
@@ -155,11 +193,13 @@ Available sounds (files in `/System/Library/Sounds/`):
 ```
 ├── main.py                      # Entry point, state machine
 ├── src/
-│   ├── config.py                # All settings (model, prompt, sound)
+│   ├── config.py                # All settings (model, prompt, sound, history)
 │   ├── audio_recorder.py        # Microphone recording
 │   ├── transcriber.py           # Whisper inference
 │   ├── hotkey_listener.py       # Global F5 listener
-│   └── clipboard_handler.py     # Clipboard integration
+│   ├── clipboard_handler.py     # Clipboard integration
+│   ├── menu_bar.py              # Menu bar icon and history dropdown
+│   └── history.py               # JSONL history storage
 └── .claude/agents/              # Claude Code agents
     ├── setup-checker.md         # Environment checks
     └── transcription-tester.md  # Transcription quality tests
