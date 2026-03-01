@@ -25,8 +25,8 @@ class App:
         self._recorder = AudioRecorder()
         self._transcriber = Transcriber()
         self._hotkey = HotkeyListener(on_f5=self._on_f5)
-        self._menu_bar = MenuBarController()
         self._history = HistoryManager()
+        self._menu_bar = MenuBarController(history=self._history)
 
     def run(self) -> None:
         print("Press F5 to start recording. Press F5 again to stop and transcribe.")
@@ -66,6 +66,7 @@ class App:
                 copy_to_clipboard(text)
                 if HISTORY_ENABLED:
                     self._history.add(text)
+                    self._menu_bar.refresh_history()
                 print(f"Copied to clipboard: {text}")
                 self._play_done_sound()
             else:

@@ -36,3 +36,9 @@ HISTORY_ENABLED = True
 
 # How many recent transcriptions to keep (older entries are trimmed).
 HISTORY_MAX_ENTRIES = 15
+
+# Number of recent transcriptions shown in the menu bar dropdown.
+MENU_RECENT_COUNT = 3
+
+# Max characters to show per item in the menu bar (longer texts are truncated).
+MENU_RECENT_MAX_LENGTH = 50
